@@ -25,20 +25,34 @@ jobs:
     steps:
     - name: Check out sources
       uses: actions/checkout@v3
+
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
       with:
         msystem: ucrt64
         update: true
-        pacboy: gcc:p cmake:p ninja:p make:p
+        install: >-
+          mingw-w64-ucrt-x86_64-gcc13
+          mingw-w64-ucrt-x86_64-gcc13-g++
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-ninja
+          base-devel
+
     - name: Set up vcpkg
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
+
     - name: Configure
-      run: cmake --preset=release-mingw-x86_64 -DMELONDS_EMBED_BUILD_INFO=ON
+      run: >
+        cmake --preset=release-mingw-x86_64
+        -DMELONDS_EMBED_BUILD_INFO=ON
+        -DCMAKE_C_COMPILER=/ucrt64/bin/gcc-13.exe
+        -DCMAKE_CXX_COMPILER=/ucrt64/bin/g++-13.exe
+
     - name: Build
       run: cmake --build --preset=release-mingw-x86_64
+
     - uses: actions/upload-artifact@v4
       with:
         name: melonDS-windows-x86_64
