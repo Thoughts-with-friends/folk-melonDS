@@ -1,4 +1,4 @@
-name: Windows
+name: Windows Build with GCC 14.2.0
 
 on:
   push:
@@ -22,8 +22,9 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+
     steps:
-    - name: Check out sources
+    - name: Checkout source
       uses: actions/checkout@v3
 
     - name: Set up MSYS2
@@ -31,9 +32,13 @@ jobs:
       with:
         msystem: ucrt64
         update: true
-        pacboy: gcc:p cmake:p ninja:p make:p
+        pacboy: cmake:p ninja:p make:p
 
-    - name: Install GCC 14.2.0
+    - name: Install required MSYS2 packages
+      run: |
+        pacman -S --noconfirm git gcc tar xz
+
+    - name: Clone and build GCC 14.2.0
       run: |
         git clone --branch releases/gcc-14 git://gcc.gnu.org/git/gcc.git
         cd gcc
@@ -45,18 +50,22 @@ jobs:
         make -j$(nproc)
         make install
 
+    - name: Confirm GCC version
+      run: gcc --version
+
     - name: Set up vcpkg
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
-    - name: Configure
+    - name: Configure CMake
       run: cmake --preset=release-mingw-x86_64 -DMELONDS_EMBED_BUILD_INFO=ON
 
     - name: Build
       run: cmake --build --preset=release-mingw-x86_64
 
-    - uses: actions/upload-artifact@v4
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
       with:
         name: melonDS-windows-x86_64
-        path: .\build\release-mingw-x86_64\melonDS.exe
+        path: ./build/release-mingw-x86_64/melonDS.exe
