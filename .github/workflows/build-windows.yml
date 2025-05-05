@@ -23,37 +23,34 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-    - name: Check out sources
-      uses: actions/checkout@v3
+      - name: Check out sources
+        uses: actions/checkout@v3
 
-    - name: Set up MSYS2
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: ucrt64
-        update: true
-        install: >-
-          mingw-w64-ucrt-x86_64-gcc13
-          mingw-w64-ucrt-x86_64-gcc13-g++
-          mingw-w64-ucrt-x86_64-cmake
-          mingw-w64-ucrt-x86_64-ninja
-          base-devel
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ucrt64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-clang
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            base-devel
 
-    - name: Set up vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
-    - name: Configure
-      run: >
-        cmake --preset=release-mingw-x86_64
-        -DMELONDS_EMBED_BUILD_INFO=ON
-        -DCMAKE_C_COMPILER=/ucrt64/bin/gcc-13.exe
-        -DCMAKE_CXX_COMPILER=/ucrt64/bin/g++-13.exe
+      - name: Configure with Clang
+        run: >
+          cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=/ucrt64/bin/clang.exe -DCMAKE_CXX_COMPILER=/ucrt64/bin/clang.exe -B build -DMELONDS_EMBED_BUILD_INFO=ON
+          
+      - name: Build
+        run: cmake --build ./build -j$(nproc)
 
-    - name: Build
-      run: cmake --build --preset=release-mingw-x86_64
-
-    - uses: actions/upload-artifact@v4
-      with:
-        name: melonDS-windows-x86_64
-        path: .\build\release-mingw-x86_64\melonDS.exe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: melonDS-windows-x86_64
+          path: .\build\release-mingw-x86_64\melonDS.exe
