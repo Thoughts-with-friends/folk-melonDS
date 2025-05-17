@@ -226,7 +226,9 @@ u32 DMA::UnitTimings9_16(bool burststart)
                     if (dst_s == 4)
                         MRAMBurstTable = DMATiming::MRAMRead16Bursts[1];
                     else
-                        MRAMBurstTable = DMATiming::MRAMRead16Bursts[2];
+                        // MRAMBurstTable = DMATiming::MRAMRead16Bursts[2];
+                        auto tmp = DMATiming::MRAMRead16Bursts[2];
+                        MRAMBurstTable = tmp;
                 }
                 else
                     MRAMBurstTable = DMATiming::MRAMRead16Bursts[0];
@@ -404,7 +406,9 @@ u32 DMA::UnitTimings7_16(bool burststart)
                     if (dst_s == 4)
                         MRAMBurstTable = DMATiming::MRAMRead16Bursts[1];
                     else
-                        MRAMBurstTable = DMATiming::MRAMRead16Bursts[2];
+                        // MRAMBurstTable = DMATiming::MRAMRead16Bursts[2];
+                        auto tmp = DMATiming::MRAMRead16Bursts[2];
+                        MRAMBurstTable = tmp;
                 }
                 else
                     MRAMBurstTable = DMATiming::MRAMRead16Bursts[0];
